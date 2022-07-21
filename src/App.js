@@ -13,7 +13,7 @@ export default function App() {
   console.log('currentAccount: ', currentAccount)
 
   // デプロイされたコントラクトのアドレスを保持する変数を作成
-  const contractAddress = '0x180274D66B736300440B24693f9D3B5cEFA01FFe'
+  const contractAddress = '0x7645048Fc05564e323DA218E9025DF1AF9bad33a'
   // ABIの内容を参照する変数を作成
   const contractABI = abi.abi
 

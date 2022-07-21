@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react'
-// import { ethers } from 'ethers'
+import { ethers } from 'ethers'
+import abi from './utils/WavePortal.json'
 import './App.css'
 
 export default function App() {
@@ -7,11 +8,39 @@ export default function App() {
   const [currentAccount, setCurrentAccount] = useState('')
   console.log('currentAccount: ', currentAccount)
 
-  const wave = () => {}
+  // デプロイされたコントラクトのアドレスを保持する変数を作成
+  const contractAddress = '0x29eA044D8848d5339b623d21cFE6dfDba7cF54CB'
+  // ABIの内容を参照する変数を作成
+  const contractABI = abi.abi
 
+  // waveの回数をカウントする関数を実装
+  const wave = async () => {
+    try {
+      const { ethereum } = window
+      if (ethereum) {
+        const provider = new ethers.providers.Web3Provider(ethereum)
+        const signer = provider.getSigner()
+        const wavePortalContract = new ethers.Contract(contractAddress, contractABI, signer)
+        let count = await wavePortalContract.getTotalWaves()
+        console.log('Retrieved total wave count...', count.toNumber())
+
+        //コントラクトに👋（wave）を書き込む。
+        const waveTxn = await wavePortalContract.wave()
+        console.log('Mining...', waveTxn.hash)
+        await waveTxn.wait()
+        console.log('Mined -- ', waveTxn.hash)
+        count = await wavePortalContract.getTotalWaves()
+        console.log('Retrieved total wave count...', count.toNumber())
+      } else {
+        console.log("Ethereum object doesn't exist!")
+      }
+    } catch (error) {
+      console.log(error)
+    }
+  }
   const checkIfWalletIsConnected = async () => {
     try {
-      /* window.ethereumにアクセスできることを確認します */
+      // window.ethereumにアクセスできることを確認します
       const { ethereum } = window
       if (!ethereum) {
         console.log('Make sure you have MetaMask!')
@@ -19,7 +48,7 @@ export default function App() {
         console.log('We have the ethereum object', ethereum)
       }
 
-      /* ユーザーのウォレットへのアクセスが許可されているかどうかを確認します */
+      // ユーザーのウォレットへのアクセスが許可されているかどうかを確認します
       const accounts = await ethereum.request({ method: 'eth_accounts' })
       if (accounts.length !== 0) {
         const account = accounts[0]
@@ -51,9 +80,6 @@ export default function App() {
     }
   }
 
-  /*
-   * WEBページがロードされたときに下記の関数を実行します。
-   */
   useEffect(() => {
     checkIfWalletIsConnected()
   }, [])
